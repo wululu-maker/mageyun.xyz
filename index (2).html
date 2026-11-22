@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#081832">
+<title>Mageyun Mail</title>
+<style>
+:root{color-scheme:dark;--t:#eff7ff;--m:#a9bedc;--line:#ffffff25;--glass:rgba(255,255,255,.095);--blue:#83caff}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;color:var(--t);font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;background:#07152e;isolation:isolate;overflow-x:hidden}
+body:before,body:after{content:"";position:fixed;inset:-30%;z-index:-1;pointer-events:none;filter:blur(45px) saturate(145%);background:radial-gradient(ellipse at 18% 25%,#278bff70,transparent 31%),radial-gradient(ellipse at 78% 25%,#00dfff45,transparent 32%),radial-gradient(ellipse at 54% 78%,#6268ff55,transparent 35%);animation:drift 25s ease-in-out infinite alternate}
+body:after{opacity:.65;animation:drift2 34s ease-in-out infinite alternate}
+@keyframes drift{to{transform:translate(5%,3%) scale(1.12) rotate(4deg)}}@keyframes drift2{to{transform:translate(-4%,-3%) scale(1.1) rotate(-5deg)}}
+.glass{background:linear-gradient(135deg,#ffffff20,#ffffff09);border:1px solid var(--line);box-shadow:0 24px 70px #0005;backdrop-filter:blur(25px) saturate(155%);-webkit-backdrop-filter:blur(25px) saturate(155%)}
+.app{max-width:1440px;margin:auto;padding:20px}.top{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;border-radius:21px}.brand{font-weight:800;font-size:19px}.logo{display:inline-grid;place-items:center;width:38px;height:38px;margin-right:9px;border-radius:13px;color:#06204b;background:linear-gradient(135deg,#8be7ff,#75aaff)}
+.layout{display:grid;grid-template-columns:245px 1fr;gap:17px;margin-top:17px}.side,.main{border-radius:22px;min-width:0}.side{padding:16px;min-height:620px;display:flex;flex-direction:column}.main{min-height:620px;overflow:hidden}
+button,input{font:inherit}button{cursor:pointer}.primary{border:0;border-radius:13px;padding:12px 15px;font-weight:750;color:#08234b;background:linear-gradient(110deg,#8be7ff,#75aaff)}.secondary,.nav,.icon{border:1px solid var(--line);border-radius:12px;background:#ffffff0b;color:var(--t);padding:10px 12px}.compose{width:100%;margin-bottom:20px}.nav{display:flex;justify-content:space-between;width:100%;margin:3px 0;text-align:left;border-color:transparent}.nav.active,.nav:hover{background:#80bdff24;border-color:#9bd2ff33}.muted{color:var(--m);font-size:13px}.foot{margin-top:auto;padding:12px;border:1px solid var(--line);border-radius:13px;color:var(--m);font-size:12px}
+.toolbar{display:flex;gap:10px;padding:17px 20px;border-bottom:1px solid var(--line)}.search{flex:1;min-width:0}.search input,.field input{width:100%;padding:11px 13px;border-radius:12px;border:1px solid var(--line);background:#03152c66;color:var(--t);outline:none}
+.content{padding:20px}.heading{display:flex;align-items:center;justify-content:space-between;margin-bottom:17px}h1{font-size:23px;margin:0}.list{display:grid;gap:9px}.item{display:grid;grid-template-columns:minmax(130px,190px) minmax(0,1fr) auto;gap:12px;align-items:center;padding:14px;border:1px solid #ffffff19;border-radius:14px;background:#ffffff08;cursor:pointer}.item:hover{background:#80bdff1b}.item strong,.subject{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.snippet{color:var(--m);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.date{font-size:12px;color:var(--m);white-space:nowrap}.reader{display:none}.reader.show{display:block}.reader h2{overflow-wrap:anywhere}.reader-head{display:flex;gap:9px;margin-bottom:18px}.sender{padding:13px;border:1px solid var(--line);border-radius:14px;background:#ffffff08}.body{padding:22px 3px;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.8}.empty{text-align:center;padding:65px 12px;border:1px dashed var(--line);border-radius:15px;color:var(--m)}
+.overlay{position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;padding:18px;background:#020a18b8}.dialog{width:min(440px,100%);padding:23px;border-radius:22px}.dialog h2{margin-top:0}.field{margin:13px 0}.field label{display:block;color:var(--m);font-size:13px;margin-bottom:6px}.dialog .primary{width:100%;margin-top:8px}.hint{font-size:12px;color:var(--m);margin-top:12px}.status{font-size:12px;color:var(--m);padding:8px 10px}
+@media(max-width:760px){.app{padding:10px}.layout{grid-template-columns:1fr}.side{min-height:0;display:none}.side.open{display:flex}.foot{display:none}.main{min-height:calc(100vh - 90px)}.item{grid-template-columns:minmax(0,1fr) auto;gap:6px}.item .snippet{grid-column:1/3}.toolbar,.content{padding:13px}.brand{font-size:17px}}
+@media(prefers-reduced-motion:reduce){body:before,body:after{animation:none}}
+</style></head>
+<body><div class="app">
+<header class="top glass"><div class="brand"><span class="logo">✉</span>Mageyun <span style="color:#8be7ff">Mail</span></div><div><button class="secondary" id="settingsBtn">连接设置</button></div></header>
+<div class="layout">
+<aside class="side glass" id="side"><button class="primary compose" id="compose">＋ 写邮件</button><div class="muted" style="margin:5px 10px">邮箱</div>
+<button class="nav active" id="allMail">📥 邮件会话 <span id="inboxCount"></span></button>
+<button class="nav" id="openEmayler">↗ 打开 Emayler 收件箱</button>
+<div class="foot">真实邮件由 Emayler API 提供。当前列表展示所选邮箱的会话；发送、回复及其他文件夹管理请在 Emayler 官方收件箱中完成。</div></aside>
+<main class="main glass"><div class="toolbar"><button class="icon" id="menu">☰</button><div class="search"><input id="q" placeholder="搜索邮件（至少两个字符）"></div><button class="icon" id="refresh">↻</button></div>
+<section class="content"><div id="listView"><div class="heading"><div><h1 id="title">邮件会话</h1><div class="muted" id="sub">连接后加载真实邮件</div></div><select id="mailbox" class="secondary" aria-label="选择邮箱" style="max-width:48%"><option value="">选择邮箱</option></select></div><div class="list" id="list"><div class="empty">请先点击“连接设置”配置 Cloudflare Worker。</div></div></div>
+<div class="reader" id="reader"><div class="reader-head"><button class="secondary" id="back">← 返回</button><button class="secondary" id="mark">标记已读</button><button class="secondary" id="trash">移至回收站</button></div><h2 id="readTitle"></h2><div class="sender" id="readSender"></div><div class="body" id="readBody"></div><button class="primary" id="reply">在 Emayler 中回复 / 发送</button></div></section></main>
+</div></div>
+<div class="overlay" id="setup"><div class="dialog glass"><h2>连接 Mageyun Mail</h2><p class="muted">填写 Cloudflare Worker 地址和访问密码。Emayler API Key 保存在 Worker，不会出现在网页里。</p>
+<div class="field"><label>Cloudflare Worker URL</label><input id="workerUrl" placeholder="https://mageyun-mail-api.xxx.workers.dev"></div>
+<div class="field"><label>Mageyun 访问密码</label><input id="accessPass" type="password" placeholder="你在 Cloudflare 设置的 MAGEYUN_APP_PASSWORD"></div>
+<button class="primary" id="connect">保存并连接</button><div class="hint">访问密码仅保存在当前浏览器标签页的 sessionStorage。不要使用 Emayler 登录密码。</div></div></div>
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+let base=sessionStorage.getItem("mageyun_worker")||"", pass=sessionStorage.getItem("mageyun_pass")||"", mailbox="", folder="INBOX", current=null;
+const names={all:"邮件会话"};
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function showSetup(){ $("workerUrl").value=base;$("accessPass").value=pass;$("setup").style.display="flex"; }
+async function api(path, options={}) {
+ if(!base||!pass) throw new Error("请先完成连接设置");
+ const res=await fetch(base.replace(/\/+$/,"")+"/api"+path,{...options,headers:{"Content-Type":"application/json","X-Mageyun-Password":pass,...(options.headers||{})}});
+ const data=await res.json().catch(()=>({error:"服务器返回了无法解析的数据"}));
+ if(!res.ok) throw new Error(data.error||data.message||("API 错误 "+res.status));
+ return data;
+}
+function rowsOf(d){if(Array.isArray(d))return d;for(const k of ["threads","mailboxes","items","results","data"])if(Array.isArray(d?.[k]))return d[k];return [];}
+function idOf(x){return x.id||x.thread_id||x.mailbox_id||""}
+function addr(x){if(typeof x==="string")return x;if(!x)return "";return x.email||x.address||x.name||""}
+function dateOf(x){const d=x.updated_at||x.date||x.received_at||x.created_at||x.timestamp;return d?new Date(d).toLocaleString():""}
+function renderThreads(d){const arr=rowsOf(d);$("list").innerHTML="";$("sub").textContent=arr.length+" 个会话";
+ if(!arr.length){$("list").innerHTML='<div class="empty">当前文件夹没有邮件，或 API 返回了空列表。</div>';return}
+ arr.forEach(t=>{const el=document.createElement("div");el.className="item";const from=addr(t.from||t.latest_message?.from||t.sender)||"发件人";const subject=t.subject||t.latest_message?.subject||"(无主题)";const snippet=t.snippet||t.preview||t.latest_message?.snippet||t.latest_message?.text||"";el.innerHTML=`<strong>${esc(from)}</strong><div><div class="subject">${esc(subject)}</div><div class="snippet">${esc(snippet)}</div></div><span class="date">${esc(dateOf(t))}</span>`;el.onclick=()=>openThread(idOf(t));$("list").appendChild(el)});
+}
+async function loadMailboxes(){const d=await api("/mailboxes");const ms=rowsOf(d);$("mailbox").innerHTML='<option value="">选择邮箱</option>';ms.forEach(m=>{const o=document.createElement("option");o.value=idOf(m);o.textContent=m.address||m.email||m.display_name||idOf(m);$("mailbox").appendChild(o)});if(ms.length){mailbox=idOf(ms[0]);$("mailbox").value=mailbox;await loadThreads()}}
+async function loadThreads(){if(!mailbox){$("list").innerHTML='<div class="empty">请先选择邮箱。</div>';return}const d=await api("/threads?mailbox_id="+encodeURIComponent(mailbox)+"&limit=50");renderThreads(d)}
+async function search(){const term=$("q").value.trim();if(term.length<2){await loadThreads();return}const d=await api("/search?q="+encodeURIComponent(term)+"&mailbox_id="+encodeURIComponent(mailbox)+"&limit=50");renderThreads(d)}
+async function openThread(id){if(!id)throw new Error("会话缺少 ID");const d=await api("/threads/"+encodeURIComponent(id));current=id;const t=d.thread||d.data||d;const msgs=t.messages||d.messages||[];const last=msgs[msgs.length-1]||t;$("readTitle").textContent=t.subject||last.subject||"(无主题)";$("readSender").textContent=[addr(last.from||t.from),last.to||"",dateOf(last)].filter(Boolean).join(" · ");$("readBody").textContent=last.text||last.body||last.html||last.snippet||JSON.stringify(last,null,2);$("listView").style.display="none";$("reader").classList.add("show");}
+async function act(path,body){await api(path,{method:"POST",body:JSON.stringify(body||{})});}
+async function refresh(){try{if($("q").value.trim().length>=2)await search();else await loadThreads()}catch(e){alert(e.message)}}
+$("allMail").onclick=async()=>{document.querySelectorAll(".nav").forEach(n=>n.classList.remove("active"));$("allMail").classList.add("active");$("title").textContent="邮件会话";try{await refresh()}catch(e){alert(e.message)}$("side").classList.remove("open")};
+$("openEmayler").onclick=()=>window.open("https://app.emayler.com","_blank","noopener");
+$("mailbox").onchange=async e=>{mailbox=e.target.value;await refresh()};
+$("connect").onclick=async()=>{base=$("workerUrl").value.trim().replace(/\/+$/,"");pass=$("accessPass").value;if(!/^https:\/\/[a-z0-9.-]+(?::\d+)?$/i.test(base)){alert("请填写完整的 https:// Worker 地址");return}sessionStorage.setItem("mageyun_worker",base);sessionStorage.setItem("mageyun_pass",pass);try{await api("/mailboxes");$("setup").style.display="none";await loadMailboxes()}catch(e){alert("连接失败："+e.message)}};
+$("settingsBtn").onclick=showSetup;$("refresh").onclick=refresh;$("menu").onclick=()=>$("side").classList.toggle("open");$("q").addEventListener("keydown",e=>{if(e.key==="Enter")search().catch(x=>alert(x.message))});
+$("back").onclick=()=>{$("reader").classList.remove("show");$("listView").style.display="block";current=null};
+$("mark").onclick=async()=>{try{await act("/threads/"+encodeURIComponent(current)+"/read");alert("已标记已读")}catch(e){alert(e.message)}};
+$("trash").onclick=async()=>{try{await act("/threads/"+encodeURIComponent(current)+"/move",{folder:"Trash"});$("back").click();await refresh()}catch(e){alert(e.message)}};
+$("compose").onclick=()=>window.open("https://app.emayler.com","_blank","noopener");
+$("reply").onclick=()=>window.open("https://app.emayler.com","_blank","noopener");
+if(base&&pass){$("setup").style.display="none";loadMailboxes().catch(e=>{showSetup();alert(e.message)})}
+})();
+</script></body></html>
