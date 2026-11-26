@@ -1,77 +1,544 @@
+
 <!doctype html>
 <html lang="zh-CN">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#081832">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#081832">
 <title>Mageyun Mail</title>
 <style>
-:root{color-scheme:dark;--t:#eff7ff;--m:#a9bedc;--line:#ffffff25;--glass:rgba(255,255,255,.095);--blue:#83caff}
-*{box-sizing:border-box}body{margin:0;min-height:100vh;color:var(--t);font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;background:#07152e;isolation:isolate;overflow-x:hidden}
-body:before,body:after{content:"";position:fixed;inset:-30%;z-index:-1;pointer-events:none;filter:blur(45px) saturate(145%);background:radial-gradient(ellipse at 18% 25%,#278bff70,transparent 31%),radial-gradient(ellipse at 78% 25%,#00dfff45,transparent 32%),radial-gradient(ellipse at 54% 78%,#6268ff55,transparent 35%);animation:drift 25s ease-in-out infinite alternate}
-body:after{opacity:.65;animation:drift2 34s ease-in-out infinite alternate}
-@keyframes drift{to{transform:translate(5%,3%) scale(1.12) rotate(4deg)}}@keyframes drift2{to{transform:translate(-4%,-3%) scale(1.1) rotate(-5deg)}}
+:root{color-scheme:dark;--fg:#eff7ff;--muted:#a9bedc;--line:#ffffff25;--blue:#83caff}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;color:var(--fg);font:15px/1.5 system-ui,sans-serif;background:#07152e;overflow-x:hidden}
+body:before,body:after{content:"";position:fixed;inset:-30%;z-index:-1;pointer-events:none;filter:blur(45px);background:radial-gradient(ellipse at 18% 25%,#278bff70,transparent 31%),radial-gradient(ellipse at 78% 25%,#00dfff45,transparent 32%),radial-gradient(ellipse at 54% 78%,#6268ff55,transparent 35%);animation:drift 25s ease-in-out infinite alternate}
+body:after{opacity:.65;animation-duration:34s;animation-direction:alternate-reverse}
+@keyframes drift{to{transform:translate(5%,3%) scale(1.12) rotate(4deg)}}
 .glass{background:linear-gradient(135deg,#ffffff20,#ffffff09);border:1px solid var(--line);box-shadow:0 24px 70px #0005;backdrop-filter:blur(25px) saturate(155%);-webkit-backdrop-filter:blur(25px) saturate(155%)}
-.app{max-width:1440px;margin:auto;padding:20px}.top{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;border-radius:21px}.brand{font-weight:800;font-size:19px}.logo{display:inline-grid;place-items:center;width:38px;height:38px;margin-right:9px;border-radius:13px;color:#06204b;background:linear-gradient(135deg,#8be7ff,#75aaff)}
-.layout{display:grid;grid-template-columns:245px 1fr;gap:17px;margin-top:17px}.side,.main{border-radius:22px;min-width:0}.side{padding:16px;min-height:620px;display:flex;flex-direction:column}.main{min-height:620px;overflow:hidden}
-button,input{font:inherit}button{cursor:pointer}.primary{border:0;border-radius:13px;padding:12px 15px;font-weight:750;color:#08234b;background:linear-gradient(110deg,#8be7ff,#75aaff)}.secondary,.nav,.icon{border:1px solid var(--line);border-radius:12px;background:#ffffff0b;color:var(--t);padding:10px 12px}.compose{width:100%;margin-bottom:20px}.nav{display:flex;justify-content:space-between;width:100%;margin:3px 0;text-align:left;border-color:transparent}.nav.active,.nav:hover{background:#80bdff24;border-color:#9bd2ff33}.muted{color:var(--m);font-size:13px}.foot{margin-top:auto;padding:12px;border:1px solid var(--line);border-radius:13px;color:var(--m);font-size:12px}
-.toolbar{display:flex;gap:10px;padding:17px 20px;border-bottom:1px solid var(--line)}.search{flex:1;min-width:0}.search input,.field input{width:100%;padding:11px 13px;border-radius:12px;border:1px solid var(--line);background:#03152c66;color:var(--t);outline:none}
-.content{padding:20px}.heading{display:flex;align-items:center;justify-content:space-between;margin-bottom:17px}h1{font-size:23px;margin:0}.list{display:grid;gap:9px}.item{display:grid;grid-template-columns:minmax(130px,190px) minmax(0,1fr) auto;gap:12px;align-items:center;padding:14px;border:1px solid #ffffff19;border-radius:14px;background:#ffffff08;cursor:pointer}.item:hover{background:#80bdff1b}.item strong,.subject{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.snippet{color:var(--m);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.date{font-size:12px;color:var(--m);white-space:nowrap}.reader{display:none}.reader.show{display:block}.reader h2{overflow-wrap:anywhere}.reader-head{display:flex;gap:9px;margin-bottom:18px}.sender{padding:13px;border:1px solid var(--line);border-radius:14px;background:#ffffff08}.body{padding:22px 3px;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.8}.empty{text-align:center;padding:65px 12px;border:1px dashed var(--line);border-radius:15px;color:var(--m)}
-.overlay{position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;padding:18px;background:#020a18b8}.dialog{width:min(440px,100%);padding:23px;border-radius:22px}.dialog h2{margin-top:0}.field{margin:13px 0}.field label{display:block;color:var(--m);font-size:13px;margin-bottom:6px}.dialog .primary{width:100%;margin-top:8px}.hint{font-size:12px;color:var(--m);margin-top:12px}.status{font-size:12px;color:var(--m);padding:8px 10px}
-@media(max-width:760px){.app{padding:10px}.layout{grid-template-columns:1fr}.side{min-height:0;display:none}.side.open{display:flex}.foot{display:none}.main{min-height:calc(100vh - 90px)}.item{grid-template-columns:minmax(0,1fr) auto;gap:6px}.item .snippet{grid-column:1/3}.toolbar,.content{padding:13px}.brand{font-size:17px}}
+.app{max-width:1440px;margin:auto;padding:20px}
+.top{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;border-radius:21px}
+.brand{font-weight:800;font-size:19px}
+.logo{display:inline-grid;place-items:center;width:38px;height:38px;margin-right:9px;border-radius:13px;color:#06204b;background:linear-gradient(135deg,#8be7ff,#75aaff)}
+.layout{display:grid;grid-template-columns:245px 1fr;gap:17px;margin-top:17px}
+.side,.main{border-radius:22px;min-width:0}
+.side{padding:16px;min-height:620px;display:flex;flex-direction:column}
+.main{min-height:620px;overflow:hidden}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
+.primary{border:0;border-radius:13px;padding:11px 15px;font-weight:750;color:#08234b;background:linear-gradient(110deg,#8be7ff,#75aaff)}
+.secondary,.nav,.icon{border:1px solid var(--line);border-radius:12px;background:#ffffff0b;color:var(--fg);padding:10px 12px}
+.compose{width:100%;margin-bottom:20px}
+.nav{display:flex;justify-content:space-between;width:100%;margin:3px 0;text-align:left;border-color:transparent}
+.nav.active,.nav:hover{background:#80bdff24;border-color:#9bd2ff33}
+.muted{color:var(--muted);font-size:13px}
+.foot{margin-top:auto;padding:12px;border:1px solid var(--line);border-radius:13px;color:var(--muted);font-size:12px}
+.toolbar{display:flex;gap:10px;padding:17px 20px;border-bottom:1px solid var(--line)}
+.search{flex:1;min-width:0}
+.search input,.field input,.field textarea{width:100%;padding:11px 13px;border-radius:12px;border:1px solid var(--line);background:#03152c99;color:var(--fg);outline:none}
+.content{padding:20px}
+.heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:17px}
+h1{font-size:23px;margin:0}
+.list{display:grid;gap:9px}
+.item{display:grid;grid-template-columns:minmax(130px,190px) minmax(0,1fr) auto;gap:12px;align-items:center;padding:14px;border:1px solid #ffffff19;border-radius:14px;background:#ffffff08;cursor:pointer}
+.item:hover{background:#80bdff1b}
+.item strong,.subject{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.snippet{color:var(--muted);font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.date{font-size:12px;color:var(--muted);white-space:nowrap}
+.reader,.composer{display:none}
+.reader.show,.composer.show{display:block}
+.reader h2{overflow-wrap:anywhere}
+.reader-head{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:18px}
+.sender{padding:13px;border:1px solid var(--line);border-radius:14px;background:#ffffff08}
+.body{padding:22px 3px;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.8}
+.empty{text-align:center;padding:65px 12px;border:1px dashed var(--line);border-radius:15px;color:var(--muted)}
+.overlay{position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;padding:18px;background:#020a18b8}
+.dialog{width:min(440px,100%);padding:23px;border-radius:22px}
+.dialog h2{margin-top:0}
+.field{margin:13px 0}
+.field label{display:block;color:var(--muted);font-size:13px;margin-bottom:6px}
+.dialog .primary{width:100%;margin-top:8px}
+.hint{font-size:12px;color:var(--muted);margin-top:12px}
+.status{font-size:12px;color:var(--muted);padding:8px 10px}
+.composer textarea{min-height:180px;resize:vertical}
+.composer .field{margin:15px 0}
+select option{background:#102746;color:white}
+@media(max-width:760px){
+ .app{padding:10px}.layout{grid-template-columns:1fr}
+ .side{min-height:0;display:none}.side.open{display:flex}
+ .foot{display:none}.main{min-height:calc(100vh - 90px)}
+ .item{grid-template-columns:minmax(0,1fr) auto;gap:6px}
+ .item .snippet{grid-column:1/3}
+ .toolbar,.content{padding:13px}.brand{font-size:17px}
+}
 @media(prefers-reduced-motion:reduce){body:before,body:after{animation:none}}
-</style></head>
-<body><div class="app">
-<header class="top glass"><div class="brand"><span class="logo">✉</span>Mageyun <span style="color:#8be7ff">Mail</span></div><div><button class="secondary" id="settingsBtn">连接设置</button></div></header>
+</style>
+</head>
+<body>
+<div class="app">
+<header class="top glass">
+  <div class="brand"><span class="logo">✉</span>Mageyun <span style="color:#8be7ff">Mail</span></div>
+  <div><button class="secondary" id="logoutBtn" hidden>退出登录</button></div>
+</header>
+
 <div class="layout">
-<aside class="side glass" id="side"><button class="primary compose" id="compose">＋ 写邮件</button><div class="muted" style="margin:5px 10px">邮箱</div>
-<button class="nav active" id="allMail">📥 邮件会话 <span id="inboxCount"></span></button>
-<button class="nav" id="openEmayler">↗ 打开 Emayler 收件箱</button>
-<div class="foot">真实邮件由 Emayler API 提供。当前列表展示所选邮箱的会话；发送、回复及其他文件夹管理请在 Emayler 官方收件箱中完成。</div></aside>
-<main class="main glass"><div class="toolbar"><button class="icon" id="menu">☰</button><div class="search"><input id="q" placeholder="搜索邮件（至少两个字符）"></div><button class="icon" id="refresh">↻</button></div>
-<section class="content"><div id="listView"><div class="heading"><div><h1 id="title">邮件会话</h1><div class="muted" id="sub">连接后加载真实邮件</div></div><select id="mailbox" class="secondary" aria-label="选择邮箱" style="max-width:48%"><option value="">选择邮箱</option></select></div><div class="list" id="list"><div class="empty">请先点击“连接设置”配置 Cloudflare Worker。</div></div></div>
-<div class="reader" id="reader"><div class="reader-head"><button class="secondary" id="back">← 返回</button><button class="secondary" id="mark">标记已读</button><button class="secondary" id="trash">移至回收站</button></div><h2 id="readTitle"></h2><div class="sender" id="readSender"></div><div class="body" id="readBody"></div><button class="primary" id="reply">在 Emayler 中回复 / 发送</button></div></section></main>
-</div></div>
-<div class="overlay" id="setup"><div class="dialog glass"><h2>连接 Mageyun Mail</h2><p class="muted">填写 Cloudflare Worker 地址和访问密码。Emayler API Key 保存在 Worker，不会出现在网页里。</p>
-<div class="field"><label>Cloudflare Worker URL</label><input id="workerUrl" placeholder="https://mageyun-mail-api.xxx.workers.dev"></div>
-<div class="field"><label>Mageyun 访问密码</label><input id="accessPass" type="password" placeholder="你在 Cloudflare 设置的 MAGEYUN_APP_PASSWORD"></div>
-<button class="primary" id="connect">保存并连接</button><div class="hint">访问密码仅保存在当前浏览器标签页的 sessionStorage。不要使用 Emayler 登录密码。</div></div></div>
+<aside class="side glass" id="side">
+  <button class="primary compose" id="composeBtn">＋ 写邮件</button>
+  <div class="muted" style="margin:5px 10px">邮箱文件夹</div>
+  <div id="folderList"><div class="status">登录后加载文件夹</div></div>
+  <div class="foot">Mageyun Mail · Zoho Mail 服务<br>邮件由 Zoho 账户管理和存储。</div>
+</aside>
+
+<main class="main glass">
+  <div class="toolbar">
+    <button class="icon" id="menuBtn">☰</button>
+    <div class="search"><input id="searchInput" placeholder="搜索邮件"></div>
+    <button class="icon" id="refreshBtn">↻</button>
+  </div>
+  <section class="content">
+    <div id="listView">
+      <div class="heading">
+        <div><h1 id="pageTitle">收件箱</h1><div class="muted" id="subTitle">正在等待登录</div></div>
+        <button class="secondary" id="folderRefreshBtn">刷新</button>
+      </div>
+      <div class="list" id="mailList"><div class="empty">请先登录 Mageyun Mail。</div></div>
+    </div>
+
+    <div class="reader" id="reader">
+      <div class="reader-head">
+        <button class="secondary" id="backBtn">← 返回</button>
+        <button class="secondary" id="markReadBtn">标记已读</button>
+      </div>
+      <h2 id="readSubject"></h2>
+      <div class="sender" id="readMeta"></div>
+      <div class="body" id="readBody"></div>
+      <button class="primary" id="replyBtn">回复邮件</button>
+    </div>
+
+    <div class="composer" id="composer">
+      <div class="reader-head"><button class="secondary" id="cancelComposeBtn">← 返回</button></div>
+      <h2 id="composeTitle">写邮件</h2>
+      <div class="field"><label>收件人</label><input id="toInput" placeholder="recipient@example.com"></div>
+      <div class="field"><label>主题</label><input id="subjectInput" placeholder="邮件主题"></div>
+      <div class="field"><label>正文</label><textarea id="bodyInput" placeholder="输入邮件内容"></textarea></div>
+      <button class="primary" id="sendBtn">发送邮件</button>
+      <span class="status" id="sendStatus"></span>
+    </div>
+  </section>
+</main>
+</div>
+</div>
+
+<div class="overlay" id="loginOverlay">
+  <div class="dialog glass">
+    <h2>登录 Mageyun Mail</h2>
+    <p class="muted">使用你的 Mageyun Mail 专属账户登录。</p>
+    <div class="field"><label>用户名</label><input id="usernameInput" value="admin" autocomplete="username"></div>
+    <div class="field"><label>登录密码</label><input id="passwordInput" type="password" placeholder="输入 Mageyun Mail 登录密码" autocomplete="current-password"></div>
+    <button class="primary" id="loginBtn">登录</button>
+    <div class="hint" id="loginHint">登录密码由 Mageyun Mail 管理，不是 Zoho 密码。</div>
+  </div>
+</div>
+
 <script>
-(()=>{
-const $=id=>document.getElementById(id);
-let base=sessionStorage.getItem("mageyun_worker")||"", pass=sessionStorage.getItem("mageyun_pass")||"", mailbox="", folder="INBOX", current=null;
-const names={all:"邮件会话"};
-const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-function showSetup(){ $("workerUrl").value=base;$("accessPass").value=pass;$("setup").style.display="flex"; }
-async function api(path, options={}) {
- if(!base||!pass) throw new Error("请先完成连接设置");
- const res=await fetch(base.replace(/\/+$/,"")+"/api"+path,{...options,headers:{"Content-Type":"application/json","X-Mageyun-Password":pass,...(options.headers||{})}});
- const data=await res.json().catch(()=>({error:"服务器返回了无法解析的数据"}));
- if(!res.ok) throw new Error(data.error||data.message||("API 错误 "+res.status));
- return data;
+(() => {
+"use strict";
+
+const WORKER = "https://mageyun-mail-api.1954824855.workers.dev";
+const $ = id => document.getElementById(id);
+
+let session = sessionStorage.getItem("mageyun_session") || "";
+let accountId = "";
+let folderId = "";
+let folderName = "收件箱";
+let currentMessage = null;
+let currentDetail = null;
+let currentMessages = [];
+
+const escapeHTML = value => String(value ?? "").replace(/[&<>"']/g, c => ({
+  "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+}[c]));
+
+function showLogin(message) {
+  $("loginOverlay").style.display = "flex";
+  $("loginHint").textContent = message || "登录密码由 Mageyun Mail 管理，不是 Zoho 密码。";
+  $("logoutBtn").hidden = true;
 }
-function rowsOf(d){if(Array.isArray(d))return d;for(const k of ["threads","mailboxes","items","results","data"])if(Array.isArray(d?.[k]))return d[k];return [];}
-function idOf(x){return x.id||x.thread_id||x.mailbox_id||""}
-function addr(x){if(typeof x==="string")return x;if(!x)return "";return x.email||x.address||x.name||""}
-function dateOf(x){const d=x.updated_at||x.date||x.received_at||x.created_at||x.timestamp;return d?new Date(d).toLocaleString():""}
-function renderThreads(d){const arr=rowsOf(d);$("list").innerHTML="";$("sub").textContent=arr.length+" 个会话";
- if(!arr.length){$("list").innerHTML='<div class="empty">当前文件夹没有邮件，或 API 返回了空列表。</div>';return}
- arr.forEach(t=>{const el=document.createElement("div");el.className="item";const from=addr(t.from||t.latest_message?.from||t.sender)||"发件人";const subject=t.subject||t.latest_message?.subject||"(无主题)";const snippet=t.snippet||t.preview||t.latest_message?.snippet||t.latest_message?.text||"";el.innerHTML=`<strong>${esc(from)}</strong><div><div class="subject">${esc(subject)}</div><div class="snippet">${esc(snippet)}</div></div><span class="date">${esc(dateOf(t))}</span>`;el.onclick=()=>openThread(idOf(t));$("list").appendChild(el)});
+
+function showApp() {
+  $("loginOverlay").style.display = "none";
+  $("logoutBtn").hidden = false;
 }
-async function loadMailboxes(){const d=await api("/mailboxes");const ms=rowsOf(d);$("mailbox").innerHTML='<option value="">选择邮箱</option>';ms.forEach(m=>{const o=document.createElement("option");o.value=idOf(m);o.textContent=m.address||m.email||m.display_name||idOf(m);$("mailbox").appendChild(o)});if(ms.length){mailbox=idOf(ms[0]);$("mailbox").value=mailbox;await loadThreads()}}
-async function loadThreads(){if(!mailbox){$("list").innerHTML='<div class="empty">请先选择邮箱。</div>';return}const d=await api("/threads?mailbox_id="+encodeURIComponent(mailbox)+"&limit=50");renderThreads(d)}
-async function search(){const term=$("q").value.trim();if(term.length<2){await loadThreads();return}const d=await api("/search?q="+encodeURIComponent(term)+"&mailbox_id="+encodeURIComponent(mailbox)+"&limit=50");renderThreads(d)}
-async function openThread(id){if(!id)throw new Error("会话缺少 ID");const d=await api("/threads/"+encodeURIComponent(id));current=id;const t=d.thread||d.data||d;const msgs=t.messages||d.messages||[];const last=msgs[msgs.length-1]||t;$("readTitle").textContent=t.subject||last.subject||"(无主题)";$("readSender").textContent=[addr(last.from||t.from),last.to||"",dateOf(last)].filter(Boolean).join(" · ");$("readBody").textContent=last.text||last.body||last.html||last.snippet||JSON.stringify(last,null,2);$("listView").style.display="none";$("reader").classList.add("show");}
-async function act(path,body){await api(path,{method:"POST",body:JSON.stringify(body||{})});}
-async function refresh(){try{if($("q").value.trim().length>=2)await search();else await loadThreads()}catch(e){alert(e.message)}}
-$("allMail").onclick=async()=>{document.querySelectorAll(".nav").forEach(n=>n.classList.remove("active"));$("allMail").classList.add("active");$("title").textContent="邮件会话";try{await refresh()}catch(e){alert(e.message)}$("side").classList.remove("open")};
-$("openEmayler").onclick=()=>window.open("https://app.emayler.com","_blank","noopener");
-$("mailbox").onchange=async e=>{mailbox=e.target.value;await refresh()};
-$("connect").onclick=async()=>{base=$("workerUrl").value.trim().replace(/\/+$/,"");pass=$("accessPass").value;if(!/^https:\/\/[a-z0-9.-]+(?::\d+)?$/i.test(base)){alert("请填写完整的 https:// Worker 地址");return}sessionStorage.setItem("mageyun_worker",base);sessionStorage.setItem("mageyun_pass",pass);try{await api("/mailboxes");$("setup").style.display="none";await loadMailboxes()}catch(e){alert("连接失败："+e.message)}};
-$("settingsBtn").onclick=showSetup;$("refresh").onclick=refresh;$("menu").onclick=()=>$("side").classList.toggle("open");$("q").addEventListener("keydown",e=>{if(e.key==="Enter")search().catch(x=>alert(x.message))});
-$("back").onclick=()=>{$("reader").classList.remove("show");$("listView").style.display="block";current=null};
-$("mark").onclick=async()=>{try{await act("/threads/"+encodeURIComponent(current)+"/read");alert("已标记已读")}catch(e){alert(e.message)}};
-$("trash").onclick=async()=>{try{await act("/threads/"+encodeURIComponent(current)+"/move",{folder:"Trash"});$("back").click();await refresh()}catch(e){alert(e.message)}};
-$("compose").onclick=()=>window.open("https://app.emayler.com","_blank","noopener");
-$("reply").onclick=()=>window.open("https://app.emayler.com","_blank","noopener");
-if(base&&pass){$("setup").style.display="none";loadMailboxes().catch(e=>{showSetup();alert(e.message)})}
+
+async function request(path, options = {}) {
+  const headers = {
+    "Content-Type": "application/json",
+    ...(session ? {"X-Mageyun-Session": session} : {}),
+    ...(options.headers || {})
+  };
+  const response = await fetch(WORKER + path, {...options, headers});
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    if (response.status === 401) {
+      session = "";
+      sessionStorage.removeItem("mageyun_session");
+      showLogin("登录已失效，请重新登录。");
+    }
+    throw new Error(data.error || data.message || ("请求失败：" + response.status));
+  }
+  return data;
+}
+
+function arrayFrom(data, keys) {
+  if (Array.isArray(data)) return data;
+  for (const key of keys) {
+    if (Array.isArray(data?.[key])) return data[key];
+  }
+  if (Array.isArray(data?.data)) return data.data;
+  return [];
+}
+
+function getAccountId(item) {
+  return String(item.accountId || item.account_id || item.id || "");
+}
+
+function getFolderId(item) {
+  return String(item.folderId || item.folder_id || item.id || "");
+}
+
+function getAddress(value) {
+  if (!value) return "";
+  if (typeof value === "string") return value;
+  return value.email || value.address || value.emailAddress || value.name || "";
+}
+
+function getDate(item) {
+  const value = item.receivedTime || item.received_time || item.date ||
+    item.sentDateInGMT || item.timestamp || item.created_at;
+  if (!value) return "";
+  const date = typeof value === "number"
+    ? new Date(value < 1000000000000 ? value * 1000 : value)
+    : new Date(value);
+  return Number.isNaN(date.getTime()) ? String(value) : date.toLocaleString();
+}
+
+function getSubject(item) {
+  return item.subject || item.topic || "(无主题)";
+}
+
+function getMessageId(item) {
+  return String(item.messageId || item.message_id || item.id || item.threadId || "");
+}
+
+function setMainView(view) {
+  $("listView").style.display = view === "list" ? "block" : "none";
+  $("reader").classList.toggle("show", view === "reader");
+  $("composer").classList.toggle("show", view === "composer");
+}
+
+async function login() {
+  const username = $("usernameInput").value.trim();
+  const password = $("passwordInput").value;
+  if (!username || !password) {
+    $("loginHint").textContent = "请输入用户名和密码。";
+    return;
+  }
+
+  $("loginBtn").disabled = true;
+  $("loginHint").textContent = "正在验证登录信息……";
+
+  try {
+    const result = await request("/auth/login", {
+      method: "POST",
+      body: JSON.stringify({username, password})
+    });
+
+    const token = result.session || result.token || result.session_token ||
+      result.sessionToken || result.access_token;
+
+    if (!token) throw new Error("登录接口没有返回会话令牌，请检查 Worker 登录接口响应。");
+
+    session = token;
+    sessionStorage.setItem("mageyun_session", session);
+    $("passwordInput").value = "";
+    showApp();
+    await initialize();
+  } catch (error) {
+    $("loginHint").textContent = "登录失败：" + error.message;
+  } finally {
+    $("loginBtn").disabled = false;
+  }
+}
+
+async function logout() {
+  try {
+    await request("/auth/logout", {method:"POST", body:"{}"});
+  } catch (_) {}
+  session = "";
+  sessionStorage.removeItem("mageyun_session");
+  accountId = "";
+  folderId = "";
+  showLogin("已退出登录。");
+  $("mailList").innerHTML = '<div class="empty">请登录 Mageyun Mail。</div>';
+}
+
+async function initialize() {
+  showApp();
+  const status = await request("/api/status");
+
+  if (!status.zohoConnected) {
+    $("subTitle").textContent = "需要连接 Zoho 账户";
+    $("mailList").innerHTML = '<div class="empty">正在跳转到 Zoho 完成邮箱授权……</div>';
+
+    const auth = await request("/oauth/start");
+    const url = auth.authorization_url || auth.auth_url || auth.url ||
+      auth.authorizationUrl;
+    if (!url) throw new Error("授权接口没有返回 Zoho 授权地址。");
+    location.href = url;
+    return;
+  }
+
+  await loadAccounts();
+}
+
+async function loadAccounts() {
+  const data = await request("/api/mailboxes");
+  const accounts = arrayFrom(data, ["data","accounts","mailboxes","results"]);
+
+  if (!accounts.length) {
+    $("mailList").innerHTML = '<div class="empty">Zoho 账户已连接，但没有读取到邮箱账户。</div>';
+    $("subTitle").textContent = "没有可用邮箱账户";
+    return;
+  }
+
+  accountId = getAccountId(accounts[0]);
+  if (!accountId) throw new Error("Zoho 邮箱账户数据缺少 accountId。");
+
+  await loadFolders();
+}
+
+async function loadFolders() {
+  const data = await request("/api/folders?account_id=" + encodeURIComponent(accountId));
+  const folders = arrayFrom(data, ["data","folders","folderList","results"]);
+
+  $("folderList").innerHTML = "";
+  if (!folders.length) {
+    $("folderList").innerHTML = '<div class="status">没有读取到文件夹。</div>';
+    return;
+  }
+
+  const preferred = folders.find(f => {
+    const name = String(f.folderName || f.folder_name || f.name || "").toLowerCase();
+    return name === "inbox" || name === "收件箱";
+  }) || folders[0];
+
+  for (const folder of folders) {
+    const id = getFolderId(folder);
+    const name = folder.folderName || folder.folder_name || folder.name || "邮件文件夹";
+    const button = document.createElement("button");
+    button.className = "nav";
+    button.textContent = (String(name).toLowerCase().includes("sent") ? "📤 " :
+      String(name).toLowerCase().includes("trash") ? "🗑 " : "📥 ") + name;
+    button.dataset.folderId = id;
+    button.onclick = async () => {
+      folderId = id;
+      folderName = name;
+      document.querySelectorAll(".nav").forEach(x => x.classList.remove("active"));
+      button.classList.add("active");
+      $("pageTitle").textContent = name;
+      await loadMessages();
+      $("side").classList.remove("open");
+    };
+    $("folderList").appendChild(button);
+  }
+
+  folderId = getFolderId(preferred);
+  folderName = preferred.folderName || preferred.folder_name || preferred.name || "收件箱";
+  const first = [...$("folderList").children].find(x => x.dataset.folderId === folderId);
+  if (first) first.classList.add("active");
+
+  $("pageTitle").textContent = folderName;
+  await loadMessages();
+}
+
+async function loadMessages() {
+  if (!accountId || !folderId) return;
+  $("mailList").innerHTML = '<div class="empty">正在加载邮件……</div>';
+  const query = new URLSearchParams({
+    account_id: accountId,
+    folder_id: folderId,
+    limit: "50"
+  });
+  const data = await request("/api/threads?" + query.toString());
+  renderMessages(data);
+}
+
+function renderMessages(data) {
+  currentMessages = arrayFrom(data, ["data","messages","threads","items","results"]);
+  $("mailList").innerHTML = "";
+  $("subTitle").textContent = currentMessages.length + " 封邮件";
+
+  if (!currentMessages.length) {
+    $("mailList").innerHTML = '<div class="empty">这个文件夹暂时没有邮件。</div>';
+    return;
+  }
+
+  for (const message of currentMessages) {
+    const id = getMessageId(message);
+    const sender = getAddress(message.from || message.sender || message.fromAddress) || "未知发件人";
+    const subject = getSubject(message);
+    const snippet = message.summary || message.snippet || message.preview || message.content || "";
+    const row = document.createElement("div");
+    row.className = "item";
+    row.innerHTML = `
+      <strong>${escapeHTML(sender)}</strong>
+      <div>
+        <div class="subject">${escapeHTML(subject)}</div>
+        <div class="snippet">${escapeHTML(snippet)}</div>
+      </div>
+      <span class="date">${escapeHTML(getDate(message))}</span>`;
+    row.addEventListener("click", () => openMessage(id));
+    $("mailList").appendChild(row);
+  }
+}
+
+async function searchMessages() {
+  const term = $("searchInput").value.trim();
+  if (term.length < 2) {
+    await loadMessages();
+    return;
+  }
+  const query = new URLSearchParams({
+    account_id: accountId,
+    q: term
+  });
+  const data = await request("/api/search?" + query.toString());
+  renderMessages(data);
+}
+
+async function openMessage(id) {
+  if (!id) {
+    alert("邮件缺少 message ID。");
+    return;
+  }
+  const query = new URLSearchParams({
+    account_id: accountId,
+    folder_id: folderId
+  });
+  const data = await request("/api/threads/" + encodeURIComponent(id) + "?" + query.toString());
+  currentDetail = data;
+  currentMessage = id;
+
+  const detail = data.message || data.thread || data.data || data;
+  $("readSubject").textContent = getSubject(detail);
+
+  const from = getAddress(detail.from || detail.sender || detail.fromAddress);
+  const to = getAddress(detail.to || detail.toAddress);
+  $("readMeta").textContent = [from, to, getDate(detail)].filter(Boolean).join(" · ");
+
+  const content = detail.content || detail.text || detail.body || detail.html ||
+    data.content || data.text || data.body || "";
+  $("readBody").textContent = content || "邮件正文为空，或当前接口没有返回正文内容。";
+
+  setMainView("reader");
+}
+
+async function markRead() {
+  if (!currentMessage) return;
+  await request("/api/threads/" + encodeURIComponent(currentMessage) +
+    "/read?account_id=" + encodeURIComponent(accountId), {
+      method:"POST",
+      body:"{}"
+    });
+  alert("已提交标记已读请求。");
+}
+
+function openComposer(reply = false) {
+  $("composeTitle").textContent = reply ? "回复邮件" : "写邮件";
+  $("toInput").value = "";
+  $("subjectInput").value = "";
+  $("bodyInput").value = "";
+
+  if (reply && currentDetail) {
+    const detail = currentDetail.message || currentDetail.thread ||
+      currentDetail.data || currentDetail;
+    $("toInput").value = getAddress(detail.from || detail.sender || detail.fromAddress);
+    const subject = getSubject(detail);
+    $("subjectInput").value = subject.startsWith("Re:") ? subject : "Re: " + subject;
+  }
+
+  $("sendStatus").textContent = "";
+  setMainView("composer");
+}
+
+async function sendMail() {
+  const to = $("toInput").value.trim();
+  const subject = $("subjectInput").value.trim();
+  const content = $("bodyInput").value;
+
+  if (!to) return alert("请填写收件人。");
+  if (!content.trim()) return alert("邮件正文不能为空。");
+
+  $("sendBtn").disabled = true;
+  $("sendStatus").textContent = "正在发送……";
+
+  try {
+    await request("/api/send", {
+      method:"POST",
+      body:JSON.stringify({
+        account_id: accountId,
+        to,
+        subject,
+        content
+      })
+    });
+    $("sendStatus").textContent = "发送请求已完成。";
+    alert("邮件发送请求已提交。");
+    setMainView("list");
+  } catch (error) {
+    $("sendStatus").textContent = "发送失败：" + error.message;
+  } finally {
+    $("sendBtn").disabled = false;
+  }
+}
+
+async function refresh() {
+  try {
+    if ($("searchInput").value.trim().length >= 2) await searchMessages();
+    else await loadMessages();
+  } catch (error) {
+    alert(error.message);
+  }
+}
+
+$("loginBtn").addEventListener("click", login);
+$("passwordInput").addEventListener("keydown", e => {
+  if (e.key === "Enter") login();
+});
+$("logoutBtn").addEventListener("click", logout);
+$("refreshBtn").addEventListener("click", refresh);
+$("folderRefreshBtn").addEventListener("click", refresh);
+$("menuBtn").addEventListener("click", () => $("side").classList.toggle("open"));
+$("searchInput").addEventListener("keydown", e => {
+  if (e.key === "Enter") searchMessages().catch(error => alert(error.message));
+});
+$("composeBtn").addEventListener("click", () => openComposer(false));
+$("replyBtn").addEventListener("click", () => openComposer(true));
+$("sendBtn").addEventListener("click", sendMail);
+$("cancelComposeBtn").addEventListener("click", () => setMainView("list"));
+$("backBtn").addEventListener("click", () => setMainView("list"));
+$("markReadBtn").addEventListener("click", () => markRead().catch(e => alert(e.message)));
+
+if (new URLSearchParams(location.search).get("zoho") === "connected") {
+  history.replaceState({}, "", location.pathname);
+}
+
+if (session) {
+  initialize().catch(error => {
+    showLogin("初始化失败：" + error.message);
+  });
+} else {
+  showLogin();
+}
 })();
-</script></body></html>
+</script>
+</body>
+</html>
