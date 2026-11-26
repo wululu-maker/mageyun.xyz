@@ -84,7 +84,7 @@ select option{background:#102746;color:white}
   <button class="primary compose" id="composeBtn">＋ 写邮件</button>
   <div class="muted" style="margin:5px 10px">邮箱文件夹</div>
   <div id="folderList"><div class="status">登录后加载文件夹</div></div>
-  <div class="foot">Mageyun Mail · Zoho Mail 服务<br>邮件由 Zoho 账户管理和存储。</div>
+  <div class="foot">Mageyun Mail v2.3 · Zoho Mail 服务<br>邮件由 Zoho 账户管理和存储。</div>
 </aside>
 
 <main class="main glass">
@@ -142,10 +142,13 @@ select option{background:#102746;color:white}
 (() => {
 "use strict";
 
-const WORKER = "https://mageyun-mail-api.1954824855.workers.dev";
+const ENDPOINTS = [
+  "https://mailapi.mageyun.xyz",                     // 主线路：自有域名（不依赖 workers.dev，国内可达）
+  "https://mageyun-mail-api.1954824855.workers.dev"   // 备用线路：Cloudflare workers.dev
+];
 const $ = id => document.getElementById(id);
 
-let session = sessionStorage.getItem("mageyun_session") || "";
+let session = localStorage.getItem("mageyun_session") || sessionStorage.getItem("mageyun_session") || "";
 let accountId = "";
 let folderId = "";
 let folderName = "收件箱";
@@ -174,11 +177,25 @@ async function request(path, options = {}) {
     ...(session ? {"X-Mageyun-Session": session} : {}),
     ...(options.headers || {})
   };
-  const response = await fetch(WORKER + path, {...options, headers});
+  let response = null, lastError = null;
+  for (const base of ENDPOINTS) {
+    try {
+      response = await fetch(base + path, {...options, headers});
+      break;
+    } catch (err) {
+      lastError = err;
+    }
+  }
+  if (!response) {
+    throw new Error("无法连接邮件服务器（已尝试全部线路：" +
+      (lastError && lastError.message ? lastError.message : "网络错误") +
+      "）。请检查网络后重试。");
+  }
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
     if (response.status === 401) {
       session = "";
+      localStorage.removeItem("mageyun_session");
       sessionStorage.removeItem("mageyun_session");
       showLogin("登录已失效，请重新登录。");
     }
@@ -257,7 +274,8 @@ async function login() {
     if (!token) throw new Error("登录接口没有返回会话令牌，请检查 Worker 登录接口响应。");
 
     session = token;
-    sessionStorage.setItem("mageyun_session", session);
+    localStorage.setItem("mageyun_session", session);
+    sessionStorage.removeItem("mageyun_session");
     $("passwordInput").value = "";
     showApp();
     await initialize();
@@ -273,6 +291,7 @@ async function logout() {
     await request("/auth/logout", {method:"POST", body:"{}"});
   } catch (_) {}
   session = "";
+  localStorage.removeItem("mageyun_session");
   sessionStorage.removeItem("mageyun_session");
   accountId = "";
   folderId = "";
